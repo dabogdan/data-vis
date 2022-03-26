@@ -1,6 +1,6 @@
 // Global variable to store the gallery object. The gallery object is
 // a container for all the visualisations.
-var gallery;
+let gallery;
 
 function setup() {
     // Create a canvas to fill the content div from index.html.
@@ -15,9 +15,6 @@ function setup() {
     gallery.addVisual(new TechDiversityRace());
     gallery.addVisual(new TechDiversityGender());
     gallery.addVisual(new PayGapByJob2017());
-    gallery.addVisual(new PayGapTimeSeries());
-    gallery.addVisual(new ClimateChange());
-    gallery.addVisual(new UKFoodAttitudes());
     gallery.addVisual(new NutrientsTimeSeries());
     gallery.addVisual(new UkraineElections2019());
     gallery.addVisual(new WorldPopulation());
