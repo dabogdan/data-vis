@@ -29,7 +29,7 @@ function UkraineElections2019() {
 
     //set the diameter of the circe where the rectangles will be drawn around
     let innerCircle = 0;
-    let dataToDisplay = [];
+    this.dataToDisplay = [];
 
     // Preload the data. This function is called automatically by the
     // gallery when a visualisation is added.
@@ -47,7 +47,7 @@ function UkraineElections2019() {
     };
 
     this.setup = function () {
-        const self = this;
+        let self = this;
         if (!this.loaded) {
             console.log('Data not yet loaded');
             return;
@@ -84,17 +84,22 @@ function UkraineElections2019() {
             //height to zero to perform animation from the scratch
             rectCurrentHeight = 0;
             //make array of data corresponding to the chosen year out of array of parties
-            dataToDisplay = this.parties.filter((row) => {
+            this.dataToDisplay = this.parties.filter((row) => {
                 return row[3] === e;
             })
         }
+        changeYear('2019');
         //div to contain the buttons an apply styles
         this.buttonsDiv = createDiv("Choose the year: ")
         this.buttonsDiv.id("buttons");
+        this.buttonsDiv.position(400, 50)
 
-        //div to display the current year
-        this.currentYearDiv = createDiv();
-        this.currentYearDiv.id("current-year");
+        textSize(30);
+        this.titleDiv = createDiv(this.title);
+        this.titleDiv.position(400, 20)
+
+        textSize(16);
+
         //creating the buttons for each year
         this.years.forEach((e) => {
             this.button = createButton(e);
@@ -102,7 +107,8 @@ function UkraineElections2019() {
             this.button.mousePressed(() => {
                 changeYear(e);
                 //create "div" to put the buttons into it
-                this.currentYearDiv.html("Current year: " + e)
+                // change the title of the chart on change of the year
+                this.titleDiv.html('General Elections ' + e + ' in Ukraine by Political Parties');
             })
         })
     }
@@ -117,14 +123,14 @@ function UkraineElections2019() {
         a = 0;
         innerCircle = 0;
         this.buttonsDiv.remove();
-        this.currentYearDiv.remove();
+        this.titleDiv.remove();
     };
 
     this.draw = function () {
         fill(100);
         noStroke();
         //spread the columns around 360 degrees
-        const divisionOfCols = (360 / dataToDisplay.length);
+        const divisionOfCols = (360 / this.dataToDisplay.length);
 
         //method for animation, that adds to the rect height until it reaches the maximum value
         this.animate = function (percentage, index) {
@@ -147,8 +153,8 @@ function UkraineElections2019() {
         rectMode(BOTTOM);
         textSize(12);
 
-        for (let i = 0; i < dataToDisplay.length; i++) {
-            let percentageOfVotes = dataToDisplay[i][1];
+        for (let i = 0; i < this.dataToDisplay.length; i++) {
+            let percentageOfVotes = this.dataToDisplay[i][1];
             // drawing the diagram
             push()
             textAlign('left', 'bottom');
@@ -163,14 +169,14 @@ function UkraineElections2019() {
             // correcting the position of the texts
             rotate(90);
             //drawing the word 'Elected' in the inner circle, where the party was elected
-            if (dataToDisplay[i][2] === "Elected") {
+            if (this.dataToDisplay[i][2] === "Elected") {
                 text(this.parties[i][2], innerCircle - 77, 0);
             }
             // Drawing the percentage of votes
             text(parseFloat(this.animate(percentageOfVotes, 0.03)).toFixed(2), innerCircle - 33, 0);
             fill(0)
             //text "Elected"
-            text(dataToDisplay[i][0], innerCircle, 0);
+            text(this.dataToDisplay[i][0], innerCircle, 0);
             pop()
         }
     }

@@ -17,7 +17,7 @@ function NutrientsTimeSeries() {
     this.xAxisLabel = 'year';
     this.yAxisLabel = '%';
 
-    var marginSize = 35;
+    let marginSize = 35;
 
     // Layout object to store all common plot layout parameters and
     // methods.
@@ -55,7 +55,7 @@ function NutrientsTimeSeries() {
     // Preload the data. This function is called automatically by the
     // gallery when a visualisation is added.
     this.preload = function () {
-        var self = this;
+        let self = this;
         this.data = loadTable(
             './data/food/nutrients-1974-2019.csv', 'csv', 'header',
             // Callback function to set the value
@@ -69,7 +69,6 @@ function NutrientsTimeSeries() {
     this.setup = function () {
         // Font defaults.
         textSize(16);
-
         // Set min and max years: assumes data is sorted by date.
         this.startYear = Number(this.data.columns[1]);
         this.endYear = Number(this.data.columns[this.data.columns.length - 1]);
@@ -84,6 +83,7 @@ function NutrientsTimeSeries() {
     };
 
     this.destroy = function () {
+        this.colors.length = 0;
     };
 
     this.draw = function () {
@@ -112,26 +112,55 @@ function NutrientsTimeSeries() {
 
         // Plot all pay gaps between startYear and endYear using the width
         // of the canvas minus margins.
-        var numYears = this.endYear - this.startYear;
+        const numYears = this.endYear - this.startYear;
 
         // Loop over all rows and draw a line from the previous value to
         // the current.
-        for (var i = 0; i < this.data.getRowCount(); i++) {
+        for (let i = 0; i < this.data.getRowCount(); i++) {
             let previous = null;
             let row = this.data.getRow(i);
             let l = row.getString(0)
             for (let j = 1; j < numYears; j++) {
                 // Create an object to store data for the current year.
-                var current = {
+                let current = {
                     // Convert strings to numbers.
                     'year': this.startYear + j - 1,
                     'percentage': row.getNum(j),
                 };
 
-                if (previous != null) {
+                noStroke();
+                fill(this.colors[i]);
+                let textX = width - 200;
+                let textY = 80 + (i * 25);
+                text(l, textX, textY)
+                // const mouseDist = dist(textX, textY, mouseX, mouseY)
+                let labelWidth = textWidth(l);
+                //catch mouse hover over the texts
+                if ((mouseX > textX - (labelWidth * 0.5)) &&
+                    (mouseX < textX + labelWidth * 0.5) &&
+                    (mouseY > textY - 8) &&
+                    (mouseY < textY + 8)
+                    && previous != null){
+                    //make text black on hover
+                    fill(0);
+                    noStroke();
+                    text(l, textX, textY);
+                    //make the curve stroke with bigger on hover
+                    strokeWeight(5);
+                    stroke(this.colors[i]);
+                    line(this.mapYearToWidth(previous.year),
+                        this.mapPayGapToHeight(previous.percentage),
+                        this.mapYearToWidth(current.year),
+                        this.mapPayGapToHeight(current.percentage));
+                    //restore stroke, because otherwise it intervenes with the other properties
+                    strokeWeight(1);
+                }
+
+                else if (previous != null) {
                     // Draw line segment connecting previous year to current
                     // year pay gap.
                     stroke(this.colors[i]);
+                    // strokeWeight(1);
                     line(this.mapYearToWidth(previous.year),
                         this.mapPayGapToHeight(previous.percentage),
                         this.mapYearToWidth(current.year),
@@ -139,7 +168,7 @@ function NutrientsTimeSeries() {
 
                     // The number of x-axis labels to skip so that only
                     // numXTickLabels are drawn.
-                    var xLabelSkip = ceil(numYears / this.layout.numXTickLabels);
+                    let xLabelSkip = ceil(numYears / this.layout.numXTickLabels);
 
                     // Draw the tick label marking the start of the previous year.
                     if (j % xLabelSkip === 0) {
@@ -148,10 +177,6 @@ function NutrientsTimeSeries() {
                             this.layout,
                             this.mapYearToWidth.bind(this));
                     }
-                } else {
-                    noStroke();
-                    fill(this.colors[i]);
-                    text(l, width - 200, 80 + (i * 25))
                 }
                 // Assign current year to previous year so that it is available
                 // during the next iteration of this loop to give us the start
